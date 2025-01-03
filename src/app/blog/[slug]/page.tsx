@@ -4,8 +4,6 @@ import { client } from "@/sanity/lib/client";
 import { urlForImage } from "@/sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 
-export const revalidate = 60; // seconds
-
 // This function generates static paths based on the slugs.
 export async function generateStaticParams() {
   const query = `*[_type=='post']{
@@ -13,20 +11,25 @@ export async function generateStaticParams() {
   }`;
   const slugs = await client.fetch(query);
 
+  // Generate static paths for each post's slug
   return slugs.map((item: { slug: string }) => ({
-    params: { slug: item.slug },  // This should wrap the slug in 'params'
+    params: { slug: item.slug },
   }));
 }
 
-// Define PageProps to reflect the correct shape of props
-export interface PageProps {
-  params: { slug: string };
+// Define the type of PageProps to include params correctly.
+interface PageProps {
+  params: {
+    slug: string;
+  };
 }
 
-// To create static pages for dynamic routes
+// This is the page component that will render the dynamic page content
 export default async function Page({ params }: PageProps) {
-  const { slug } = params;
+  // Ensure that params is awaited
+  const { slug } = await params;
 
+  // Fetch post data based on the slug
   const query = `*[_type=='post' && slug.current=="${slug}"]{
     _id, title, summary, image, content,
     author->{bio, image, name}
