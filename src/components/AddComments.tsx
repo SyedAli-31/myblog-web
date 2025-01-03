@@ -5,15 +5,21 @@ interface Props {
   postId: string;
 }
 
+interface CommentFormData {
+  name: string;
+  email: string;
+  comment: string;
+}
+
 const AddComment = ({ postId }: Props) => {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm();
+  } = useForm<CommentFormData>(); // Specify form data type here
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CommentFormData) => {
     const { name, email, comment } = data;
 
     if (!postId) {
@@ -23,6 +29,7 @@ const AddComment = ({ postId }: Props) => {
 
     const res = await fetch("/api/comment", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, comment, postId }),
     });
 
@@ -41,7 +48,7 @@ const AddComment = ({ postId }: Props) => {
       </p>
       <form
         className="flex flex-col border dark:border-purple-950 shadow-sm rounded px-8 pt-6 pb-6 mb-10"
-        onSubmit={handleSubmit((data)=> onSubmit(data))}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <label>Name</label>
         <input
