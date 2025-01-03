@@ -6,7 +6,15 @@ import { PortableText } from "@portabletext/react";
 
 export const revalidate = 60; // seconds
 
-export async function generateStaticParams() {
+// Define the type for the parameters
+interface PageParams {
+  params: {
+    slug: string;
+  };
+}
+
+// Generate static params for dynamic routes
+export async function generateStaticParams(): Promise<{ params: { slug: string } }[]> {
   const query = `*[_type=='post']{
     "slug":slug.current
   }`;
@@ -14,12 +22,14 @@ export async function generateStaticParams() {
 
   // Return slugs as params for static generation
   return slugs.map((item: { slug: string }) => ({
-    slug: item.slug,
+    params: { slug: item.slug },
   }));
 }
 
 // To create static pages for dynamic routes
-export default async function page({ params: { slug } }: { params: { slug: string } }) {
+export default async function page({ params }: PageParams) {
+  const { slug } = params;
+
   const query = `*[_type=='post' && slug.current=="${slug}"]{
     _id, title, summary, image, content,
     author->{bio, image, name}
