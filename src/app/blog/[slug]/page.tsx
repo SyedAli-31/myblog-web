@@ -6,28 +6,25 @@ import { PortableText } from "@portabletext/react";
 
 export const revalidate = 60; // seconds
 
-// Define the type for the parameters
-interface PageParams {
-  params: {
-    slug: string;
-  };
-}
-
-// Generate static params for dynamic routes
-export async function generateStaticParams(): Promise<{ params: { slug: string } }[]> {
+// This function generates static paths based on the slugs.
+export async function generateStaticParams() {
   const query = `*[_type=='post']{
     "slug":slug.current
   }`;
   const slugs = await client.fetch(query);
 
-  // Return slugs as params for static generation
   return slugs.map((item: { slug: string }) => ({
-    params: { slug: item.slug },
+    params: { slug: item.slug },  // This should wrap the slug in 'params'
   }));
 }
 
+// Define PageProps to reflect the correct shape of props
+export interface PageProps {
+  params: { slug: string };
+}
+
 // To create static pages for dynamic routes
-export default async function page({ params }: PageParams) {
+export default async function Page({ params }: PageProps) {
   const { slug } = params;
 
   const query = `*[_type=='post' && slug.current=="${slug}"]{
